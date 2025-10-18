@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 
-
-const postSchema = mongoose.Schema(
+const PostSchema = new mongoose.Schema(
     {
-        title: String,
-        content: String 
+        title: { type: String, required: true, trim: true },
+        slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+        excerpt: { type: String, trim: true },
+        content: { type: String, required: true },
+    },
+    { timestamps: true }
+);
 
-    }
-)
+const Post = mongoose.models.Post || mongoose.model("Post", PostSchema);
 
-const post = mongoose.model.post || mongoose.model(post,postSchema)
-
-
-export default post;
+export default Post;
 
 
 

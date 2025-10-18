@@ -1,15 +1,18 @@
-import React from 'react'
+import { notFound } from "next/navigation";
+import { connectDB } from "@/lib/connectDB";
+import Post from "@/models/post";
 
-function SingleBlogPost({params}) {
-    const {slug} = params;
-    console.log(slug);
-    
+export default async function SingleBlogPost({ params }) {
+    const { slug } = params;
+    await connectDB();
+    const doc = await Post.findOne({ slug }).lean();
+    if (!doc) return notFound();
     return (
-        <div>
-            <h1>This is a single blog post page</h1>
-            <p>Slug: {slug}</p>
-        </div>
-    )
+        <main className="max-w-2xl mx-auto p-6 space-y-4">
+            <h1 className="text-3xl font-bold">{doc.title}</h1>
+            <article className="prose prose-neutral max-w-none whitespace-pre-wrap">
+                {doc.content}
+            </article>
+        </main>
+    );
 }
-
-export default page
