@@ -4,7 +4,7 @@ import Post from "@/models/post";
 
 async function getPosts() {
   await connectDB();
-  const docs = await Post.find({}, { title: 1, slug: 1, excerpt: 1 })
+  const docs = await Post.find({}, { title: 1, slug: 1, excerpt: 1, createdAt: 1 })
     .sort({ createdAt: -1 })
     .lean();
   return docs.map((d) => ({
@@ -12,29 +12,74 @@ async function getPosts() {
     title: d.title,
     slug: d.slug,
     excerpt: d.excerpt || "",
+    createdAt: d.createdAt,
   }));
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 }
 
 export default async function Home() {
   const posts = await getPosts();
+  
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Blog</h1>
-      {posts.length === 0 ? (
-        <p className="text-gray-500">No posts yet.</p>
-      ) : (
-        <ul className="space-y-4">
-          {posts.map((p) => (
-            <li key={p._id} className="border p-4 rounded hover:bg-gray-50">
-              <Link href={`/blog/${p.slug}`} className="text-xl font-semibold text-blue-600 hover:underline">
-                {p.title}
-              </Link>
-              {p.excerpt && <p className="text-gray-600 mt-1">{p.excerpt}</p>}
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+    <>
+      <section className="max-w-4xl mx-auto px-6 py-16">
+        <div className="space-y-6 mb-12">
+          <h1 className="text-5xl font-bold leading-tight">Welcome to the Blog</h1>
+          <p className="text-xl" style={{ color: "var(--text-secondary)" }}>
+            Discover stories, insights, and ideas. Read the latest articles below.
+          </p>
+        </div>
+
+        {posts.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
+              No posts yet. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {posts.map((post) => (
+              <article
+                key={post._id}
+                className="group pb-8 border-b hover:opacity-80 transition"
+                style={{ borderColor: "var(--border)" }}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="text-2xl font-bold text-blue-600 hover:opacity-80"
+                  >
+                    {post.title}
+                  </Link>
+                </div>
+                <p className="text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
+                  {formatDate(post.createdAt)}
+                </p>
+                {post.excerpt && (
+                  <p className="text-base leading-relaxed mb-4">
+                    {post.excerpt}
+                  </p>
+                )}
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="inline-flex items-center font-medium text-blue-600 hover:opacity-70"
+                >
+                  Read more →
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </>
   );
 }
+
 
